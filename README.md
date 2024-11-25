@@ -1,1 +1,1 @@
-Install pymongo via "pip install pymongo"
+Install pymongo via "pip install pymongo" in terminal
