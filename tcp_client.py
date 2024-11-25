@@ -40,7 +40,13 @@ while True:
                 print(f"Average moisture since 3 hours ago:\n {from_server.decode()} % of VMC")
                 
             elif message == "2":
-                print("You entered 2")
+                # Send message to server
+                client.send(message.encode())
+                
+                # Receive server response
+                from_server = client.recv(4096)
+                print(f"Average water consumption/cycle in the dishwasher:\n {from_server.decode()} % of VMC")
+
             elif message == "3":
                 print("You entered 3")
             else:

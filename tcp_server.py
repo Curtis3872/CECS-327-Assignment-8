@@ -57,6 +57,33 @@ while True:
                     #str(total/count) is the Volumetric Water Content (VMC)
             response = (str(round((total/count), 2)))
             conn.send(response.encode())
+
+        elif from_client == "2":
+            # 'smart' dishwashers use a max of about 5 gallons/20 liters per cycle with a max of 2 hours
+            # For every 1.5hrs/90mins is a cycle, we can do it hrly
+            # Water flow sensors have a range of about 1-30L/min
+            count = 0
+            total = 0
+            average = 0
+
+            if 'payload' in payl:
+                    payload = payl['payload']
+                    if 'WFS_DW' in payload:
+                        count += 1
+                        total += float(payload['WFS_DW'])
+            else:
+                print("'payload' not found")
+            #total/count = average 
+            #total has liters/min, convert for 1 cycle per 120 mins
+            response = (str(round((total/count), 2)))
+            conn.send(response.encode())
+
         else:
             print("Not valid")
     conn.close()
+
+    #To do list:
+    #1, fix dataniz sensor configs
+    #2, complete step 2
+    #3, polish
+    #4, work on step 3
