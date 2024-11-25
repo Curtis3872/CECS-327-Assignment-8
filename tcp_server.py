@@ -53,6 +53,7 @@ while True:
                         #print(payload['Moister_Meter_SF1'])
                 else:
                     print("'payload' not found")
+                    #str(total/count) is the Volumetric Water Content (VMC)
             response = (str(total/count))
             conn.send(response.encode())
         else:
