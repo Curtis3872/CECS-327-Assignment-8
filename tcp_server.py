@@ -40,6 +40,7 @@ while True:
         from_client = data.decode('utf8')
         
         if from_client == "1":
+            #Calculate the Volumetric Moisture Content
             count = 0
             total = 0
             average = 0
@@ -49,12 +50,12 @@ while True:
                     payload = payl['payload']
                     if 'Moister_Meter_SF1' in payload:
                         count += 1
-                        total += round(float(payload['Moister_Meter_SF1']))
-                        #print(payload['Moister_Meter_SF1'])
+                        total += float(payload['Moister_Meter_SF1'])
+
                 else:
                     print("'payload' not found")
                     #str(total/count) is the Volumetric Water Content (VMC)
-            response = (str(total/count))
+            response = (str(round((total/count), 2)))
             conn.send(response.encode())
         else:
             print("Not valid")

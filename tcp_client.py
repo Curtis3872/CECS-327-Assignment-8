@@ -27,7 +27,7 @@ while True:
         print(f"Connected to server {ip}:{port}!")
 
         while True:
-            message = input("Choose a query:('1', '2', '3' or 'exit' to close):\n")
+            message = input("Choose a query to find:\n'1': Average moisture inside your kitchen fridge in the past three hours,\n'2': Average water consumporion per cycle in your smart dishwasher,\n'3': Which device is consuming more electricity?\nor\n'exit' to close\n:")
             if message.lower() == 'exit':
                 print("Closing connection.")
                 break
@@ -37,7 +37,7 @@ while True:
                 
                 # Receive server response
                 from_server = client.recv(4096)
-                print(f"Average moisture since 3 hours ago: {from_server.decode()}")
+                print(f"Average moisture since 3 hours ago:\n {from_server.decode()} % of VMC")
                 
             elif message == "2":
                 print("You entered 2")
