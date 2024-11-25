@@ -27,17 +27,32 @@ while True:
         print(f"Connected to server {ip}:{port}!")
 
         while True:
-            message = input("Enter your message (or 'exit' to close):\n")
+            message = input("Choose a query:('1', '2', '3' or 'exit' to close):\n")
             if message.lower() == 'exit':
                 print("Closing connection.")
                 break
+            elif message == "1":
+                # Send message to server
+                client.send(message.encode())
+                
+                # Receive server response
+                from_server = client.recv(4096)
+                print(f"Average moisture since 3 hours ago: {from_server.decode()}")
+                
+            elif message == "2":
+                print("You entered 2")
+            elif message == "3":
+                print("You entered 3")
+            else:
+                print("Sorry, this query cannot be processed. Please try one of the following: [1, 2, 3].")
+                
+#How to send a message from client to server
+# Send message to server
+            #client.send(message.encode())
 
-            # Send message to server
-            client.send(message.encode())
-
-            # Receive server response
-            from_server = client.recv(4096)
-            print(f"Server replied: {from_server.decode()}")
+# Receive server response
+            #from_server = client.recv(4096)
+            #print(f"Server replied: {from_server.decode()}")
 
     except (socket.error, socket.timeout) as e:
         print(f"Failed to connect: {e}")

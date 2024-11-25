@@ -35,9 +35,26 @@ while True:
         if not data:
             print(f"Client {addr} disconnected.")
             break
+        
+        #recieved data
         from_client = data.decode('utf8')
-        print(f"From client: {from_client}")
-        # Uppercases? Find how to set initial message for this?
-        response = from_client.upper()
-        conn.send(response.encode())
+        
+        if from_client == "1":
+            count = 0
+            total = 0
+            average = 0
+
+            for payl in mycol.find(query):
+                if 'payload' in payl:
+                    payload = payl['payload']
+                    if 'Moister_Meter_SF1' in payload:
+                        count += 1
+                        total += round(float(payload['Moister_Meter_SF1']))
+                        #print(payload['Moister_Meter_SF1'])
+                else:
+                    print("'payload' not found")
+            response = (str(total/count))
+            conn.send(response.encode())
+        else:
+            print("Not valid")
     conn.close()
