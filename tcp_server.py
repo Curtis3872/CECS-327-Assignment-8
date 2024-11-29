@@ -39,25 +39,29 @@ while True:
         #recieved data
         from_client = data.decode('utf8')
         
+        #Q1: What is the average moisture inside my kitchen fridge in the past three hours?
+        #Calculate the Volumetric Moisture Content
         if from_client == "1":
-            #Calculate the Volumetric Moisture Content
+            #Prior to step 1: Initialize
             count = 0
             total = 0
             average = 0
 
-            for payl in mycol.find(query):
+            #Step 1: Get Moisture Average(Volumetric Moisture Content) from MongoDB
+            for payl in mycol.find(query): #'query' is for the parameter of 3 hours ago
                 if 'payload' in payl:
                     payload = payl['payload']
                     if 'Moister_Meter_SF1' in payload:
                         count += 1
                         total += float(payload['Moister_Meter_SF1'])
-
                 else:
                     print("'payload' not found")
-                    #str(total/count) is the Volumetric Water Content (VMC)
+            
+            #Step 2: Convert response to output and send it back to client
             response = (str(round((total/count), 2)))
             conn.send(response.encode())
 
+        #Q2: "What is the average water consumption per cycle in my smart dishwasher?"
         elif from_client == "2":
             # 'smart' dishwashers use a max of about 5 gallons/20 liters per cycle with a max of 2 hours
             # For every 1.5hrs/90mins is a cycle, we can do it hrly
@@ -78,6 +82,38 @@ while True:
             response = (str(round((total/count), 2)))
             conn.send(response.encode())
 
+        #Q3: Which device consumed more electricity among my three IoT devices (two refrigerators and a dishwasher)?
+        elif from_client == "3":
+
+            sf1_ammeter_total = 0
+            sf2_ammeter_total = 0
+            sdw_ammeter_total = 0
+
+            #Get Ammeter values in milliAMPs
+            if 'payload' in payl:
+                payload = payl['payload']
+                if 'Ammeter_SF1' in payload:
+                    sf1_ammeter_total += (payload['Ammeter_SF1'])
+                elif 'Ammeter_SF2' in payload:
+                    sf2_ammeter_total += (payload['Ammeter_SF2'])
+                elif 'Ammeter_DW' in payload:
+                    sdw_ammeter_total += (payload['Ammeter_DW'])
+                else:
+                    print(f"There is no Ammeter sensor here...")
+            
+            #Calculate which gives maximum and produce response
+            if max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sdw_ammeter_total:
+                response = "The Smart Dish Washer is using the most electricity!"
+            elif max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sf1_ammeter_total:
+                response = "Smart Fridge 1 is using the most electricity!"
+            elif max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sf2_ammeter_total:
+                response = "Smart Fridge 2 is using the most electricity!"
+            else:
+                response = "All three devices have an equal amount of AMPs!"
+
+            #Send the response for Query2
+            conn.send(response.encode())
+
         else:
             print("Not valid")
     conn.close()
@@ -87,3 +123,6 @@ while True:
     #2, complete step 2
     #3, polish
     #4, work on step 3
+
+#Notes
+#1. AMPs, average amps in a fridge and dishwasher is about 10 AMPs (9-11)
