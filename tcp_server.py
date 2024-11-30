@@ -90,29 +90,30 @@ while True:
             sdw_ammeter_total = 0
 
             #Get Ammeter values in milliAMPs
-            if 'payload' in payl:
-                payload = payl['payload']
-                if 'Ammeter_SF1' in payload:
-                    sf1_ammeter_total += (payload['Ammeter_SF1'])
-                elif 'Ammeter_SF2' in payload:
-                    sf2_ammeter_total += (payload['Ammeter_SF2'])
-                elif 'Ammeter_DW' in payload:
-                    sdw_ammeter_total += (payload['Ammeter_DW'])
+            for payl in mycol.find():    
+                if 'payload' in payl:
+                    payload = payl['payload']
+                    if 'Ammeter_SF1' in payload:
+                        sf1_ammeter_total += (int(float(payload['Ammeter_SF1'])))
+                    elif 'Ammeter_SF2' in payload:
+                        sf2_ammeter_total += (int(float(payload['Ammeter_SF2'])))
+                    elif 'Ammeter_DW' in payload:
+                        sdw_ammeter_total += (int(float(payload['Ammeter_DW'])))
+                    else:
+                        response = ("There is no Ammeter sensor here...")
+                
+                #Calculate which gives maximum and produce response
+                if max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sdw_ammeter_total:
+                    response = "1"
+                elif max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sf1_ammeter_total:
+                    response = "2"
+                elif max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sf2_ammeter_total:
+                    response = "3"
                 else:
-                    print(f"There is no Ammeter sensor here...")
-            
-            #Calculate which gives maximum and produce response
-            if max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sdw_ammeter_total:
-                response = "The Smart Dish Washer is using the most electricity!"
-            elif max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sf1_ammeter_total:
-                response = "Smart Fridge 1 is using the most electricity!"
-            elif max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sf2_ammeter_total:
-                response = "Smart Fridge 2 is using the most electricity!"
-            else:
-                response = "All three devices have an equal amount of AMPs!"
+                    response = "5"
 
-            #Send the response for Query2
-            conn.send(response.encode())
+                #Send the response for Query2
+                conn.send(response.encode())
 
         else:
             print("Not valid")

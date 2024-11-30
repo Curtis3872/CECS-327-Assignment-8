@@ -48,9 +48,21 @@ while True:
                 print(f"Average water consumption/cycle in the dishwasher:\n {from_server.decode()} % of VMC")
 
             elif message == "3":
-                print("You entered 3")
+                # Send message to server
+                client.send(message.encode())
+                
+                # Receive server response and output which uses the most
+                from_server = client.recv(4096)
+                if from_server.decode() == "1":
+                    print(f"The Smart Dish Washer is using the most electricity!\n")
+                elif from_server.decode() == "2":
+                    print(f"Smart Fridge 1 is using the most electricity!\n")
+                elif from_server.decode() == "3":
+                    print(f"Smart Fridge 2 is using the most electricity!\n")
+                else:
+                    print(f"All three devices have an equal amount of AMPs!\n")
             else:
-                print("Sorry, this query cannot be processed. Please try one of the following: [1, 2, 3].")
+                print("Sorry, this query cannot be processed. Please try one of the following: [1, 2, 3].\n")
                 
 #How to send a message from client to server
 # Send message to server
