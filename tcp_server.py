@@ -7,7 +7,8 @@ from pymongo import MongoClient
 #Use for 3 hours ago
 from datetime import datetime, timedelta
 three_hours_ago = datetime.utcnow() - timedelta(hours=3)
-cycles = datetime.utcnow() - timedelta(hours=2)
+two_hours_ago = datetime.utcnow() - timedelta(hours=2)
+one_hour_ago = datetime.utcnow() - timedelta(hours=1)
 
 #MongoDB URL
 client = MongoClient("mongodb+srv://peksonmichael:EgGiNZRLzTN581tP@cluster0.y9w6w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
@@ -18,6 +19,9 @@ mycol= dataset_1["Dataset_1_virtual"]
 
 # Query the collection in the last three hours
 query = {"time": {"$gte": three_hours_ago}}
+query2 = {"time": {"$gte": one_hour_ago}}
+query3 = {"time": {"$gte": two_hours_ago, "$lt": one_hour_ago}}
+query4 = {"time": {"$gte": three_hours_ago, "$lt": two_hours_ago}}
 
 #Find the way to change to use sockets in a certain way, have prints for IP and port number and remembr the inputs for it too.
 serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -68,23 +72,56 @@ while True:
             # For every 1.5hrs/90mins is a cycle, we can do it hrly
             # Water flow sensors have a range of about 1-30L/min
             
-            count = 0
-            total = 0
-            average = 0
+            #3 seperate cycles going through about 1 hour intervals within 3 intervals
+            count1 = 0
+            count2 = 0
+            count3 = 0
+            total1 = 0
+            total2 = 0
+            total3 = 0
+            average1 = 0
+            average2 = 0
+            average3 = 0
+            total_average_cycle = 0
+            
             #Get the water flow values(mililiters)
-            for payl in mycol.find(cycles):
+            for payl in mycol.find(query2):
                 if 'payload' in payl:
                         payload = payl['payload']
                         if 'WFS_DW' in payload:
-                            count += 1
-                            total += float(payload['WFS_DW'])
+                            count1 += 1
+                            total1 += float(payload['WFS_DW'])
                 else:
                     print("'payload' not found")
-                    
-            #Convert to mililiters -> liters (total) and get the cycle average within one 'normal' cycle
-            total = (total*0.001)//count
             
-            response = (str(total))
+            average1 = total1/count1
+            
+            for payl in mycol.find(query3):
+                if 'payload' in payl:
+                        payload = payl['payload']
+                        if 'WFS_DW' in payload:
+                            count2 += 1
+                            total2 += float(payload['WFS_DW'])
+                else:
+                    print("'payload' not found")
+            
+            average2 = total2/count2
+            
+            for payl in mycol.find(query4):
+                if 'payload' in payl:
+                        payload = payl['payload']
+                        if 'WFS_DW' in payload:
+                            count3 += 1
+                            total3 += float(payload['WFS_DW'])
+                else:
+                    print("'payload' not found")
+            
+            average3 = total3/count3
+            
+            #average cycles + conversion of mL to L
+            total_average_cycle = ((average1+average2+average3)//3)*0.001
+            
+            response = (str(total_average_cycle))
             conn.send(response.encode())
 
         #Q3: Which device consumed more electricity among my three IoT devices (two refrigerators and a dishwasher)?
