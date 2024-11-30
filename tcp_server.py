@@ -50,15 +50,15 @@ while True:
             #Prior to step 1: Initialize
             count = 0
             total = 0
-            average = 0
+            response = ""
 
             #Step 1: Get Moisture Average(Volumetric Moisture Content) from MongoDB
             for payl in mycol.find(query): #'query' is for the parameter of 3 hours ago
                 if 'payload' in payl:
                     payload = payl['payload']
-                    if 'Moister_Meter_SF1' in payload:
+                    if 'Moisture_Meter_SF1' in payload:
                         count += 1
-                        total += float(payload['Moister_Meter_SF1'])
+                        total += float(payload['Moisture_Meter_SF1'])
                 else:
                     print("'payload' not found")
             
@@ -121,7 +121,7 @@ while True:
             #average cycles + conversion of mL to L
             total_average_cycle = ((average1+average2+average3)//3)*0.001
             
-            response = (str(total_average_cycle))
+            response = str(round(total_average_cycle, 2))
             conn.send(response.encode())
 
         #Q3: Which device consumed more electricity among my three IoT devices (two refrigerators and a dishwasher)?
@@ -144,18 +144,18 @@ while True:
                     else:
                         response = ("There is no Ammeter sensor here...")
                 
-                #Calculate which gives maximum and produce response
-                if max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sdw_ammeter_total:
-                    response = "1"
-                elif max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sf1_ammeter_total:
-                    response = "2"
-                elif max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sf2_ammeter_total:
-                    response = "3"
-                else:
-                    response = "5"
+            #Calculate which gives maximum and produce response
+            if max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sdw_ammeter_total:
+                response = "1"
+            elif max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sf1_ammeter_total:
+                response = "2"
+            elif max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sf2_ammeter_total:
+                response = "3"
+            else:
+                response = "5"
 
-                #Send the response for Query2
-                conn.send(response.encode())
+            #Send the response for Query2
+            conn.send(response.encode())
 
         else:
             print("Not valid")

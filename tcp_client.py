@@ -37,7 +37,7 @@ while True:
                 
                 # Receive server response
                 from_server = client.recv(4096)
-                print(f"Average moisture since 3 hours ago:\n {from_server.decode()} % of VMC")
+                print(f"\nAverage moisture since 3 hours ago: {from_server.decode()} % of VMC\n")
                 
             elif message == "2":
                 # Send message to server
@@ -45,7 +45,7 @@ while True:
                 
                 # Receive server response
                 from_server = client.recv(4096)
-                print(f"Average water consumption per cycle in the dishwasher:  {from_server.decode()} liters")
+                print(f"\nDishwasher's average water consumption per cycle: {from_server.decode()} L\n")
 
             elif message == "3":
                 # Send message to server
@@ -54,15 +54,15 @@ while True:
                 # Receive server response and output which uses the most
                 from_server = client.recv(4096)
                 if from_server.decode() == "1":
-                    print(f"The Smart Dish Washer is using the most electricity!\n")
+                    print(f"\nThe Smart Dish Washer is using the most electricity!\n")
                 elif from_server.decode() == "2":
-                    print(f"Smart Fridge 1 is using the most electricity!\n")
+                    print(f"\nSmart Fridge 1 is using the most electricity!\n")
                 elif from_server.decode() == "3":
-                    print(f"Smart Fridge 2 is using the most electricity!\n")
+                    print(f"\nSmart Fridge 2 is using the most electricity!\n")
                 else:
-                    print(f"All three devices have an equal amount of AMPs!\n")
+                    print(f"\nAll three devices have an equal amount of AMPs!\n")
             else:
-                print("Sorry, this query cannot be processed. Please try one of the following: [1, 2, 3].\n")
+                print("\nSorry, this query cannot be processed. Please try one of the following: [1, 2, 3].\n")
                 
 #How to send a message from client to server
 # Send message to server
