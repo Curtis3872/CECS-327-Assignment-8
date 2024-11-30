@@ -6,8 +6,8 @@ from pymongo import MongoClient
 
 #Use for 3 hours ago
 from datetime import datetime, timedelta
-three_hours_ago = datetime - timedelta(hours=3)
-cycles = datetime - timedelta(hours=2)
+three_hours_ago = datetime.utcnow() - timedelta(hours=3)
+cycles = datetime.utcnow() - timedelta(hours=2)
 
 #MongoDB URL
 client = MongoClient("mongodb+srv://peksonmichael:EgGiNZRLzTN581tP@cluster0.y9w6w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
@@ -71,7 +71,8 @@ while True:
             count = 0
             total = 0
             average = 0
-            #Get the water flow values(mililiters            for payl in mycol.find(cycles):
+            #Get the water flow values(mililiters)
+            for payl in mycol.find(cycles):
                 if 'payload' in payl:
                         payload = payl['payload']
                         if 'WFS_DW' in payload:
