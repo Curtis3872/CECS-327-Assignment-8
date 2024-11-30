@@ -7,6 +7,7 @@ from pymongo import MongoClient
 #Use for 3 hours ago
 from datetime import datetime, timedelta
 three_hours_ago = datetime.utcnow() - timedelta(hours=3)
+cycles = datetime - timedelta(hours=2)
 
 #MongoDB URL
 client = MongoClient("mongodb+srv://peksonmichael:EgGiNZRLzTN581tP@cluster0.y9w6w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
@@ -66,20 +67,24 @@ while True:
             # 'smart' dishwashers use a max of about 5 gallons/20 liters per cycle with a max of 2 hours
             # For every 1.5hrs/90mins is a cycle, we can do it hrly
             # Water flow sensors have a range of about 1-30L/min
+            
             count = 0
             total = 0
             average = 0
-
-            if 'payload' in payl:
-                    payload = payl['payload']
-                    if 'WFS_DW' in payload:
-                        count += 1
-                        total += float(payload['WFS_DW'])
-            else:
-                print("'payload' not found")
-            #total/count = average 
-            #total has liters/min, convert for 1 cycle per 120 mins
-            response = (str(round((total/count), 2)))
+            #Get the water flow values(mililiters)
+            for payl in mycol.ind(cycles):
+                if 'payload' in payl:
+                        payload = payl['payload']
+                        if 'WFS_DW' in payload:
+                            count += 1
+                            total += float(payload['WFS_DW'])
+                else:
+                    print("'payload' not found")
+                    
+            #Convert to mililiters -> liters (total) and get the cycle average within one 'normal' cycle
+            total = (total*0.001)//count
+            
+            response = (str(total))
             conn.send(response.encode())
 
         #Q3: Which device consumed more electricity among my three IoT devices (two refrigerators and a dishwasher)?

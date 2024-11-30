@@ -45,7 +45,7 @@ while True:
                 
                 # Receive server response
                 from_server = client.recv(4096)
-                print(f"Average water consumption/cycle in the dishwasher:\n {from_server.decode()} % of VMC")
+                print(f"Average water consumption per cycle in the dishwasher:  {from_server.decode()} liters")
 
             elif message == "3":
                 # Send message to server
