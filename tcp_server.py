@@ -56,7 +56,7 @@ while True:
             curr_moisture = 0
             total_RH = 0
 
-            #Step 1: Get Moisture Average(Volumetric Moisture Content) from MongoDB
+            #Step 1: Get Moisture Average(Volumetric Moisture Content) from MongoDB - > convert to percentage as if 0.xxxx
             for payl in mycol.find(query): #'query' is for the parameter of 3 hours ago
                 if 'payload' in payl:
                     payload = payl['payload']
@@ -64,36 +64,36 @@ while True:
                         count1 += 1
                         curr_moisture = float(payload['Moisture_Meter_SF1'])
                         total += float(payload['Moisture_Meter_SF1'])
+                        
             #Step 2: To find the Relative Humidity, we need: 
                     if 'Thermistor_SF1' in payload:
-                        T = float(payload['Thermistor_SF1'])
+                        T = float(payload['Thermistor_SF1'])#1. temperature 
                         T = T/10 #Correct decimal point for the degrees Celcius
-                        print(T)
-                        
                         count2 +=1
-                        #1. Saturated Vapour Pressure using Tentens formula'
-                        SVP = 0.61121 ** ((18.678 - (T/234.5)) * (T / (257.14+T)))
-                        #2. Actual Vapor Pressure is the Volumetric Water Content (g/m^3)
-                        RH = round((((float(payload['Moisture_Meter_SF1'])*0.00001)/SVP)*100), 2)
-                        total_RH += RH
                         
+                        #2. Saturated Vapour Pressure using Tentens formula'
+                        SVP = 0.61121 ** ((18.678 - (T/234.5)) * (T / (257.14+T)))
+                        #3. Actual Vapor Pressure is the Volumetric Water Content (g/m^3)
+                        #4. Relative humidity with correct decimal points for incoming calculations and averages
+                        RH = round((((float(payload['Moisture_Meter_SF1'])*0.00001)/SVP)*100), 2) #Formula originally (VWC/SVP)*100
+                        total_RH += RH
                         
                 else:
                     print("'payload' not found")
             
             print("Count1: ", count1, "\nCount2: ", count2)
             #Step 2: Convert response to output and send it back to client
-            response = "\nAverage moisture since 3 hours ago: " + (str(round(((total*0.001)/count1), 2))) + "% of VMC\n" + str(round(total_RH/count2)) + "% of Relative Humidity\n"
+            #Notes (1. VWC is given correct decimal and average is calcualted) (2. Relative Humidity is rounded after average is  calcualed for better desired outputs.) 
+            response = "\nAverage moisture since 3 hours ago: " + (str(round(((total*0.001)/count1), 2))) + "% VMC & " + str(round(total_RH/count2)) + "% Relative Humidity\n"
             
             conn.send(response.encode())
 
         #Q2: "What is the average water consumption per cycle in my smart dishwasher?"
         elif from_client == "2":
             # 'smart' dishwashers use a max of about 5 gallons/20 liters per cycle with a max of 2 hours
-            # For every 1.5hrs/90mins is a cycle, we can do it hrly
-            # Water flow sensors have a range of about 1-30L/min
+            # Every hr is one cycle
             
-            #3 seperate cycles going through about 1 hour intervals within 3 intervals
+            #3 seperate cycles going through about 1 hour intervals within 3 intervals to find average for 3 cycles spanning 3 hours
             count1 = 0
             count2 = 0
             count3 = 0
@@ -105,7 +105,10 @@ while True:
             average3 = 0
             total_average_cycle = 0
             
-            #Get the water flow values(mililiters)
+            #Get the water flow values(convert from mL -> L)
+            #Each cycle(average1-3), shows the average amount of waterflow in each cycle
+            
+            #Cycle 1
             for payl in mycol.find(query2):
                 if 'payload' in payl:
                         payload = payl['payload']
@@ -117,6 +120,7 @@ while True:
             
             average1 = total1/count1
             
+            #Cycle 2
             for payl in mycol.find(query3):
                 if 'payload' in payl:
                         payload = payl['payload']
@@ -128,6 +132,7 @@ while True:
             
             average2 = total2/count2
             
+            #Cycle 3
             for payl in mycol.find(query4):
                 if 'payload' in payl:
                         payload = payl['payload']
@@ -139,7 +144,7 @@ while True:
             
             average3 = total3/count3
             
-            #average cycles + conversion of mL to L
+            #Cycles + conversion of mL to L
             total_average_cycle = ((average1+average2+average3)//3)*0.001
             
             response = str(round(total_average_cycle, 2))
@@ -175,12 +180,9 @@ while True:
             else:
                 response = "5"
 
-            #Send the response for Query2
+            #Send response
             conn.send(response.encode())
 
         else:
             print("Not valid")
     conn.close()
-
-    #To do list:
-    #Fix step 1 units of data
