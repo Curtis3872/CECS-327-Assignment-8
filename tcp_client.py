@@ -37,7 +37,7 @@ while True:
                 
                 # Receive server response
                 from_server = client.recv(4096)
-                print(f"\nAverage moisture since 3 hours ago: {from_server.decode()} % of VMC\n")
+                print(f"{from_server.decode()}\n")
                 
             elif message == "2":
                 # Send message to server

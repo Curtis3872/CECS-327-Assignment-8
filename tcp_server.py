@@ -4,11 +4,13 @@ import socket
 #Import the MongoDB client
 from pymongo import MongoClient
 
-#Use for 3 hours ago
-from datetime import datetime, timedelta
-three_hours_ago = datetime.utcnow() - timedelta(hours=3)
-two_hours_ago = datetime.utcnow() - timedelta(hours=2)
-one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+import math
+
+#Use for 1-3 hours ago
+from datetime import datetime, timedelta 
+three_hours_ago = datetime.utcnow() - timedelta(hours=3) 
+two_hours_ago = datetime.utcnow() - timedelta(hours=2)   
+one_hour_ago = datetime.utcnow() - timedelta(hours=1)    
 
 #MongoDB URL
 client = MongoClient("mongodb+srv://peksonmichael:EgGiNZRLzTN581tP@cluster0.y9w6w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
@@ -18,10 +20,10 @@ dataset_1 = client["test"]
 mycol= dataset_1["Dataset_1_virtual"]
 
 # Query the collection in the last three hours
-query = {"time": {"$gte": three_hours_ago}}
-query2 = {"time": {"$gte": one_hour_ago}}
-query3 = {"time": {"$gte": two_hours_ago, "$lt": one_hour_ago}}
-query4 = {"time": {"$gte": three_hours_ago, "$lt": two_hours_ago}}
+query = {"time": {"$gte": three_hours_ago}}                        #3 hours ago
+query2 = {"time": {"$gte": one_hour_ago}}                          #1 hour ago
+query3 = {"time": {"$gte": two_hours_ago, "$lt": one_hour_ago}}    #one hour from now and two hours ago
+query4 = {"time": {"$gte": three_hours_ago, "$lt": two_hours_ago}} #3 hours ago and 2 hours later
 
 #Find the way to change to use sockets in a certain way, have prints for IP and port number and remembr the inputs for it too.
 serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -48,22 +50,41 @@ while True:
         #Calculate the Volumetric Moisture Content
         if from_client == "1":
             #Prior to step 1: Initialize
-            count = 0
+            count1 = 0
+            count2 = 0
             total = 0
-            response = ""
+            curr_moisture = 0
+            total_RH = 0
 
             #Step 1: Get Moisture Average(Volumetric Moisture Content) from MongoDB
             for payl in mycol.find(query): #'query' is for the parameter of 3 hours ago
                 if 'payload' in payl:
                     payload = payl['payload']
                     if 'Moisture_Meter_SF1' in payload:
-                        count += 1
+                        count1 += 1
+                        curr_moisture = float(payload['Moisture_Meter_SF1'])
                         total += float(payload['Moisture_Meter_SF1'])
+            #Step 2: To find the Relative Humidity, we need: 
+                    if 'Thermistor_SF1' in payload:
+                        T = float(payload['Thermistor_SF1'])
+                        T = T/10 #Correct decimal point for the degrees Celcius
+                        print(T)
+                        
+                        count2 +=1
+                        #1. Saturated Vapour Pressure using Tentens formula'
+                        SVP = 0.61121 ** ((18.678 - (T/234.5)) * (T / (257.14+T)))
+                        #2. Actual Vapor Pressure is the Volumetric Water Content (g/m^3)
+                        RH = round((((float(payload['Moisture_Meter_SF1'])*0.00001)/SVP)*100), 2)
+                        total_RH += RH
+                        
+                        
                 else:
                     print("'payload' not found")
             
+            print("Count1: ", count1, "\nCount2: ", count2)
             #Step 2: Convert response to output and send it back to client
-            response = (str(round((total/count), 2)))
+            response = "\nAverage moisture since 3 hours ago: " + (str(round(((total*0.001)/count1), 2))) + "% of VMC\n" + str(round(total_RH/count2)) + "% of Relative Humidity\n"
+            
             conn.send(response.encode())
 
         #Q2: "What is the average water consumption per cycle in my smart dishwasher?"
@@ -162,10 +183,4 @@ while True:
     conn.close()
 
     #To do list:
-    #1, fix dataniz sensor configs
-    #2, complete step 2
-    #3, polish
-    #4, work on step 3
-
-#Notes
-#1. AMPs, average amps in a fridge and dishwasher is about 10 AMPs (9-11)
+    #Fix step 1 units of data
