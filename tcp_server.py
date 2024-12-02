@@ -17,7 +17,7 @@ client = MongoClient("mongodb+srv://peksonmichael:EgGiNZRLzTN581tP@cluster0.y9w6
 
 #Get the database directly and put into dataset_1
 dataset_1 = client["test"]
-mycol= dataset_1["Dataset_1_virtual"]
+mycol= dataset_1["data_virtual"]
 
 # Query the collection in the last three hours
 query = {"time": {"$gte": three_hours_ago}}                        #3 hours ago
@@ -60,22 +60,21 @@ while True:
             for payl in mycol.find(query): #'query' is for the parameter of 3 hours ago
                 if 'payload' in payl:
                     payload = payl['payload']
-                    if 'Moisture_Meter_SF1' in payload:
+                    if 'mm_s1' in payload:
                         count1 += 1
-                        curr_moisture = float(payload['Moisture_Meter_SF1'])
-                        total += float(payload['Moisture_Meter_SF1'])
+                        curr_moisture = float(payload['mm_s1'])
+                        total += float(payload['mm_s1'])
                         
             #Step 2: To find the Relative Humidity, we need: 
-                    if 'Thermistor_SF1' in payload:
-                        T = float(payload['Thermistor_SF1'])#1. temperature 
-                        T = T/10 #Correct decimal point for the degrees Celcius
+                    if 'temp_sf1' in payload:
+                        T = float(payload['temp_sf1'])#1. temperature
                         count2 +=1
                         
                         #2. Saturated Vapour Pressure using Tentens formula'
                         SVP = 0.61121 ** ((18.678 - (T/234.5)) * (T / (257.14+T)))
                         #3. Actual Vapor Pressure is the Volumetric Water Content (g/m^3)
                         #4. Relative humidity with correct decimal points for incoming calculations and averages
-                        RH = round((((float(payload['Moisture_Meter_SF1'])*0.00001)/SVP)*100), 2) #Formula originally (VWC/SVP)*100
+                        RH = round((((float(payload['mm_s1'])*0.00001)/SVP)*100), 2) #Formula originally (VWC/SVP)*100
                         total_RH += RH
                         
                 else:
@@ -114,7 +113,7 @@ while True:
                         payload = payl['payload']
                         if 'WFS_DW' in payload:
                             count1 += 1
-                            total1 += float(payload['WFS_DW'])
+                            total1 += float(payload['WFS_dw'])
                 else:
                     print("'payload' not found")
             
@@ -124,9 +123,9 @@ while True:
             for payl in mycol.find(query3):
                 if 'payload' in payl:
                         payload = payl['payload']
-                        if 'WFS_DW' in payload:
+                        if 'WFS_dw' in payload:
                             count2 += 1
-                            total2 += float(payload['WFS_DW'])
+                            total2 += float(payload['WFS_dw'])
                 else:
                     print("'payload' not found")
             
@@ -136,9 +135,9 @@ while True:
             for payl in mycol.find(query4):
                 if 'payload' in payl:
                         payload = payl['payload']
-                        if 'WFS_DW' in payload:
+                        if 'WFS_dw' in payload:
                             count3 += 1
-                            total3 += float(payload['WFS_DW'])
+                            total3 += float(payload['WFS_dw'])
                 else:
                     print("'payload' not found")
             
@@ -163,10 +162,10 @@ while True:
                     payload = payl['payload']
                     if 'Ammeter_SF1' in payload:
                         sf1_ammeter_total += (int(float(payload['Ammeter_SF1'])))
-                    elif 'Ammeter_SF2' in payload:
-                        sf2_ammeter_total += (int(float(payload['Ammeter_SF2'])))
-                    elif 'Ammeter_DW' in payload:
-                        sdw_ammeter_total += (int(float(payload['Ammeter_DW'])))
+                    elif 'Ammeter_sf2' in payload:
+                        sf2_ammeter_total += (int(float(payload['Ammeter_sf2'])))
+                    elif 'Ammeter_dw' in payload:
+                        sdw_ammeter_total += (int(float(payload['Ammeter_dw'])))
                     else:
                         response = ("There is no Ammeter sensor here...")
                 
