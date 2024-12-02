@@ -139,7 +139,7 @@ while True:
             #Cycles + conversion of HL to L 
             total_average_cycle = ((total1+total2+total3)/3)*0.01
             
-            response = "\nDishwasher's average water consumption per cycle: ", str(round(total_average_cycle, 2), "L")
+            response = "\nDishwasher's average water consumption per cycle: " + str(round(total_average_cycle, 2)) + " L\n"
             conn.send(response.encode())
 
         #Q3: Which device consumed more electricity among my three IoT devices (two refrigerators and a dishwasher)?
@@ -164,13 +164,13 @@ while True:
                 
             #Calculate which gives maximum and produce response
             if max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sdw_ammeter_total:
-                response = "1"
+                response = "\nThe Smart Dish Washer is using the most electricity!\n"
             elif max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sf1_ammeter_total:
-                response = "2"
+                response = "\nSmart Fridge 1 is using the most electricity!\n"
             elif max(sf1_ammeter_total, sf2_ammeter_total, sdw_ammeter_total) == sf2_ammeter_total:
-                response = "3"
+                response = "\nSmart Fridge 2 is using the most electricity!\n"
             else:
-                response = "5"
+                response = "\nAll three devices have an equal amount of AMPs!\n"
 
             #Send response
             conn.send(response.encode())

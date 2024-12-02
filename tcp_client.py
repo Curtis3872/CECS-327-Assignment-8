@@ -37,7 +37,7 @@ while True:
                 
                 # Receive server response
                 from_server = client.recv(4096)
-                print(f"{from_server.decode()}\n")
+                print(f"{from_server.decode()}")
                 
             elif message == "2":
                 # Send message to server
@@ -45,7 +45,7 @@ while True:
                 
                 # Receive server response
                 from_server = client.recv(4096)
-                print(f"\nDishwasher's average water consumption per cycle: {from_server.decode()} L\n")
+                print(f"{from_server.decode()}")
 
             elif message == "3":
                 # Send message to server
@@ -53,14 +53,8 @@ while True:
                 
                 # Receive server response and output which uses the most
                 from_server = client.recv(4096)
-                if from_server.decode() == "1":
-                    print(f"\nThe Smart Dish Washer is using the most electricity!\n")
-                elif from_server.decode() == "2":
-                    print(f"\nSmart Fridge 1 is using the most electricity!\n")
-                elif from_server.decode() == "3":
-                    print(f"\nSmart Fridge 2 is using the most electricity!\n")
-                else:
-                    print(f"\nAll three devices have an equal amount of AMPs!\n")
+                print(f"{from_server.decode()}")
+
             else:
                 print("\nSorry, this query cannot be processed. Please try one of the following: [1, 2, 3].\n")
                 
