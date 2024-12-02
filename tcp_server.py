@@ -4,8 +4,6 @@ import socket
 #Import the MongoDB client
 from pymongo import MongoClient
 
-import math
-
 #Use for 1-3 hours ago
 from datetime import datetime, timedelta 
 three_hours_ago = datetime.utcnow() - timedelta(hours=3) 
@@ -16,8 +14,8 @@ one_hour_ago = datetime.utcnow() - timedelta(hours=1)
 client = MongoClient("mongodb+srv://peksonmichael:EgGiNZRLzTN581tP@cluster0.y9w6w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 
 #Get the database directly and put into dataset_1
-dataset_1 = client["test"]
-mycol= dataset_1["data_virtual"]
+data = client["test"]
+mycol= data["Dataset_1_virtual"]
 
 # Query the collection in the last three hours
 query = {"time": {"$gte": three_hours_ago}}                        #3 hours ago
@@ -60,10 +58,10 @@ while True:
             for payl in mycol.find(query): #'query' is for the parameter of 3 hours ago
                 if 'payload' in payl:
                     payload = payl['payload']
-                    if 'mm_s1' in payload:
+                    if 'mm_sf1' in payload:
                         count1 += 1
-                        curr_moisture = float(payload['mm_s1'])
-                        total += float(payload['mm_s1'])
+                        curr_moisture = float(payload['mm_sf1'])
+                        total += float(payload['mm_sf1'])
                         
             #Step 2: To find the Relative Humidity, we need: 
                     if 'temp_sf1' in payload:
@@ -74,7 +72,7 @@ while True:
                         SVP = 0.61121 ** ((18.678 - (T/234.5)) * (T / (257.14+T)))
                         #3. Actual Vapor Pressure is the Volumetric Water Content (g/m^3)
                         #4. Relative humidity with correct decimal points for incoming calculations and averages
-                        RH = round((((float(payload['mm_s1'])*0.00001)/SVP)*100), 2) #Formula originally (VWC/SVP)*100
+                        RH = round((((float(payload['mm_sf1'])*0.00001)/SVP)*100), 2) #Formula originally (VWC/SVP)*100
                         total_RH += RH
                         
                 else:
