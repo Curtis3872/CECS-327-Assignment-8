@@ -60,28 +60,29 @@ while True:
                     payload = payl['payload']
                     if 'mm_sf1' in payload:
                         count1 += 1
-                        curr_moisture = float(payload['mm_sf1'])
-                        total += float(payload['mm_sf1'])
+                        curr_moisture = float(payload['mm_sf1'])*0.01
+                        total += curr_moisture
                         
             #Step 2: To find the Relative Humidity, we need: 
                     if 'temp_sf1' in payload:
-                        T = float(payload['temp_sf1'])#1. temperature
+                        F = float(payload['temp_sf1'])#1. temperature
+                        #convert F to C
+                        T = (F-32) * (5/9)
                         count2 +=1
                         
                         #2. Saturated Vapour Pressure using Tentens formula'
                         SVP = 0.61121 ** ((18.678 - (T/234.5)) * (T / (257.14+T)))
                         #3. Actual Vapor Pressure is the Volumetric Water Content (g/m^3)
                         #4. Relative humidity with correct decimal points for incoming calculations and averages
-                        RH = round((((float(payload['mm_sf1'])*0.00001)/SVP)*100), 2) #Formula originally (VWC/SVP)*100
+                        RH = round((((curr_moisture)/SVP)*100), 2) #Formula originally (VWC/SVP)*100
                         total_RH += RH
                         
                 else:
                     print("'payload' not found")
             
-            print("Count1: ", count1, "\nCount2: ", count2)
             #Step 2: Convert response to output and send it back to client
             #Notes (1. VWC is given correct decimal and average is calcualted) (2. Relative Humidity is rounded after average is  calcualed for better desired outputs.) 
-            response = "\nAverage moisture since 3 hours ago: " + (str(round(((total*0.001)/count1), 2))) + "% VMC & " + str(round(total_RH/count2)) + "% Relative Humidity\n"
+            response = "\nAverage moisture since 3 hours ago: " + (str(round(((total)/count1)*100, 2))) + "% VMC & " + str(round(total_RH/count2, 2)) + "% Relative Humidity\n"
             
             conn.send(response.encode())
 
@@ -111,7 +112,7 @@ while True:
                         payload = payl['payload']
                         if 'WFS_DW' in payload:
                             count1 += 1
-                            total1 += float(payload['WFS_dw'])
+                            total1 += float(payload['WFS_DW'])
                 else:
                     print("'payload' not found")
             
@@ -121,9 +122,9 @@ while True:
             for payl in mycol.find(query3):
                 if 'payload' in payl:
                         payload = payl['payload']
-                        if 'WFS_dw' in payload:
+                        if 'WFS_DW' in payload:
                             count2 += 1
-                            total2 += float(payload['WFS_dw'])
+                            total2 += float(payload['WFS_DW'])
                 else:
                     print("'payload' not found")
             
@@ -133,16 +134,16 @@ while True:
             for payl in mycol.find(query4):
                 if 'payload' in payl:
                         payload = payl['payload']
-                        if 'WFS_dw' in payload:
+                        if 'WFS_DW' in payload:
                             count3 += 1
-                            total3 += float(payload['WFS_dw'])
+                            total3 += float(payload['WFS_DW'])
                 else:
                     print("'payload' not found")
             
             average3 = total3/count3
             
             #Cycles + conversion of mL to L
-            total_average_cycle = ((average1+average2+average3)//3)*0.001
+            total_average_cycle = ((average1+average2+average3)/3)*0.001
             
             response = str(round(total_average_cycle, 2))
             conn.send(response.encode())
