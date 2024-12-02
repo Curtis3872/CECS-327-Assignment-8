@@ -116,8 +116,6 @@ while True:
                 else:
                     print("'payload' not found")
             
-            average1 = total1/count1
-            
             #Cycle 2
             for payl in mycol.find(query3):
                 if 'payload' in payl:
@@ -127,8 +125,6 @@ while True:
                             total2 += float(payload['WFS_DW'])
                 else:
                     print("'payload' not found")
-            
-            average2 = total2/count2
             
             #Cycle 3
             for payl in mycol.find(query4):
@@ -140,13 +136,10 @@ while True:
                 else:
                     print("'payload' not found")
             
-            average3 = total3/count3
+            #Cycles + conversion of HL to L 
+            total_average_cycle = ((total1+total2+total3)/3)*0.01
             
-            #Cycles + conversion of mL to L & Gallons
-            total_average_cycle = ((average1+average2+average3)/3)
-            gal = total_average_cycle*0.264172
-            
-            response = "\nDishwasher's average water consumption per cycle: ", str(round(total_average_cycle, 2), "L & ", str(round(gal)) )
+            response = "\nDishwasher's average water consumption per cycle: ", str(round(total_average_cycle, 2), "L")
             conn.send(response.encode())
 
         #Q3: Which device consumed more electricity among my three IoT devices (two refrigerators and a dishwasher)?
