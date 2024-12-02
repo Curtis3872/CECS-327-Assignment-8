@@ -142,10 +142,11 @@ while True:
             
             average3 = total3/count3
             
-            #Cycles + conversion of mL to L
-            total_average_cycle = ((average1+average2+average3)/3)*0.001
+            #Cycles + conversion of mL to L & Gallons
+            total_average_cycle = ((average1+average2+average3)/3)
+            gal = total_average_cycle*0.264172
             
-            response = str(round(total_average_cycle, 2))
+            response = "\nDishwasher's average water consumption per cycle: ", str(round(total_average_cycle, 2), "L & ", str(round(gal)) )
             conn.send(response.encode())
 
         #Q3: Which device consumed more electricity among my three IoT devices (two refrigerators and a dishwasher)?
