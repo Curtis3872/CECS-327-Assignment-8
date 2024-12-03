@@ -4,18 +4,25 @@ import socket
 #Import the MongoDB client
 from pymongo import MongoClient
 
-#Use for 1-3 hours ago
-from datetime import datetime, timedelta 
-three_hours_ago = datetime.utcnow() - timedelta(hours=3) 
-two_hours_ago = datetime.utcnow() - timedelta(hours=2)   
-one_hour_ago = datetime.utcnow() - timedelta(hours=1)    
-
 #MongoDB URL
 client = MongoClient("mongodb+srv://peksonmichael:EgGiNZRLzTN581tP@cluster0.y9w6w.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-
 #Get the database directly and put into dataset_1
 data = client["test"]
 mycol= data["Dataset_1_virtual"]
+
+#Use for 1-3 hours ago
+from datetime import timedelta 
+
+#Find latest time so I dont have to generate more data before presentation
+latest_payload = mycol.find_one(sort=[("time", -1)])
+if latest_payload and "time" in latest_payload:
+    latest_time = latest_payload["time"]
+else:
+    print("There are no records found in the collection")
+
+three_hours_ago = latest_time - timedelta(hours=3) 
+two_hours_ago = latest_time - timedelta(hours=2)   
+one_hour_ago = latest_time - timedelta(hours=1)    
 
 # Query the collection in the last three hours
 query = {"time": {"$gte": three_hours_ago}}                        #3 hours ago
@@ -55,13 +62,13 @@ while True:
             total_RH = 0
 
             #Step 1: Get Moisture Average(Volumetric Moisture Content) from MongoDB - > convert to percentage as if 0.xxxx
-            for payl in mycol.find(query): #'query' is for the parameter of 3 hours ago
+            #for payl in mycol.find(query): #'query' is for the parameter of 3 hours ago
+            for payl in mycol.find():    
                 if 'payload' in payl:
                     payload = payl['payload']
                     if 'mm_sf1' in payload:
                         count1 += 1
                         curr_moisture = float(payload['mm_sf1'])*0.01
-                        print(curr_moisture)
                         total += curr_moisture
                         
             #Step 2: To find the Relative Humidity, we need: 
@@ -116,9 +123,9 @@ while True:
                         if 'WFS_DW' in payload:
                             count1 += 1
                             total1 += float(payload['WFS_DW'])
-                            print("TOTAL1: ", total1)
                 else:
                     print("'payload' not found")
+        
             
             #Cycle 2
             for payl in mycol.find(query3):
