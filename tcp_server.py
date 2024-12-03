@@ -61,6 +61,7 @@ while True:
                     if 'mm_sf1' in payload:
                         count1 += 1
                         curr_moisture = float(payload['mm_sf1'])*0.01
+                        print(curr_moisture)
                         total += curr_moisture
                         
             #Step 2: To find the Relative Humidity, we need: 
@@ -82,7 +83,9 @@ while True:
             
             #Step 2: Convert response to output and send it back to client
             #Notes (1. VWC is given correct decimal and average is calcualted) (2. Relative Humidity is rounded after average is  calcualed for better desired outputs.) 
-            response = "\nAverage moisture since 3 hours ago: " + (str(round(((total)/count1)*100, 2))) + "% VMC & " + str(round(total_RH/count2, 2)) + "% Relative Humidity\n"
+            response = "\nAverage moisture since 3 hours ago: "
+            response += (str(round(((total)/count1)*100, 2))) + "% VMC & " 
+            response+= str(round(total_RH/count2, 2)) + "% Relative Humidity\n"
             
             conn.send(response.encode())
 
@@ -113,6 +116,7 @@ while True:
                         if 'WFS_DW' in payload:
                             count1 += 1
                             total1 += float(payload['WFS_DW'])
+                            print("TOTAL1: ", total1)
                 else:
                     print("'payload' not found")
             
